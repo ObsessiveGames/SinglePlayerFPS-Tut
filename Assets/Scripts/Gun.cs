@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 public class Gun : MonoBehaviour
 {
     private float range = 100f;
+    [SerializeField] private float damage = 20f;
     public Camera fpsCam;
     private AudioSource gunSound;
 
@@ -26,7 +27,13 @@ public class Gun : MonoBehaviour
         {
             if (hit.transform.CompareTag("Enemy"))
             {
-                hit.transform.gameObject.GetComponentInChildren<ParticleSystem>().Play();
+                Component damageable = hit.transform.GetComponent(typeof(IDamageable));
+
+                if (damageable)
+                {
+                    GameFunctions.Attack(damageable, damage);
+                    hit.transform.gameObject.GetComponentInChildren<ParticleSystem>().Play();
+                }
             }
         }
     }
