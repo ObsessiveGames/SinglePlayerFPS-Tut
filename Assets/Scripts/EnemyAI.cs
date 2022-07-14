@@ -14,6 +14,11 @@ public class EnemyAI : MonoBehaviour
     private float distanceToTarget = Mathf.Infinity;
     private bool isProvoked = false;
     private Transform target;
+    private float damage = 10f;
+
+    [Header("Attack Speed")]
+    private float attackRate = 2f;
+    private float lastAttack = 0f;
 
     private void Start()
     {
@@ -51,7 +56,24 @@ public class EnemyAI : MonoBehaviour
         else
         {
             Wait();
+            ShootTarget();
         }
+    }
+
+    private void ShootTarget()
+    {
+        if (Time.time > lastAttack + attackRate)
+        {
+            lastAttack = Time.time;
+            target.GetComponent<PlayerBehaviour>().playerHealth -= damage;
+            GetComponentInChildren<Animator>().SetTrigger("shoot");
+            Debug.Log("Enemy has dealt " + damage + " damage to you");
+        }
+    }
+
+    public void TargetDetected()
+    {
+        isProvoked = true;
     }
 
     private void Wait()

@@ -9,6 +9,7 @@ public class Gun : MonoBehaviour
     [SerializeField] private float damage = 20f;
     public Camera fpsCam;
     private AudioSource gunSound;
+    private Ammo ammo;
 
     private void Awake()
     {
@@ -16,24 +17,29 @@ public class Gun : MonoBehaviour
         inputManager.Player.Enable();
         inputManager.Player.Shoot.performed += Shoot;
         gunSound = GetComponent<AudioSource>();
+        ammo = GetComponent<Ammo>();
     }
 
     private void Shoot(InputAction.CallbackContext context)
     {
-        gunSound.Play();
-        CinemachineShake.instance.ShakeCamera(1f, .25f);
-        RaycastHit hit;
-        if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
+        if (ammo.GetCurrentAmmo() > 0)
         {
-            if (hit.transform.CompareTag("Enemy"))
+            ammo.ReduceCurrentAmmo();
+            gunSound.Play();
+            CinemachineShake.instance.ShakeCamera(1f, .25f);
+            RaycastHit hit;
+            if (Physics.Raycast(fpsCam.transform.position, fpsCam.transform.forward, out hit, range))
             {
-                Component damageable = hit.transform.GetComponent(typeof(IDamageable));
-
-                if (damageable)
+                if (hit.transform.CompareTag("Enemy"))
                 {
-                    GameFunctions.Attack(damageable, damage);
-                    hit.transform.gameObject.GetComponentInChildren<ParticleSystem>().Play();
-                    hit.transform.gameObject.GetComponent<EnemyAI>().OnDamageTaken();
+                    Component damageable = hit.transform.GetComponent(typeof(IDamageable));
+
+                    if (damageable)
+                    {
+                        GameFunctions.Attack(damageable, damage);
+                        hit.transform.gameObject.GetComponentInChildren<ParticleSystem>().Play();
+                        hit.transform.gameObject.GetComponent<EnemyAI>().OnDamageTaken();
+                    }
                 }
             }
         }
