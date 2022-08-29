@@ -22,6 +22,11 @@ public class Ammo : MonoBehaviour
         return ammoAmount;
     }
 
+    public int GetCurrentClips()
+    {
+        return clips;
+    }
+
     public void ReduceCurrentAmmo()
     {
         ammoAmount--;

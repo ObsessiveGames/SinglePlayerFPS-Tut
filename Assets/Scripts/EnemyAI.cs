@@ -20,6 +20,12 @@ public class EnemyAI : MonoBehaviour
     private float attackRate = 2f;
     private float lastAttack = 0f;
 
+    [Header("Reload")]
+    private float reloadSpeed = 3.3f;
+    private int ammoAmount = 5;
+    private int reloadAmount = 5;
+    private bool isReloading = false;
+
     private void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
@@ -49,14 +55,17 @@ public class EnemyAI : MonoBehaviour
     {
         FaceTarget();
 
-        if (distanceToTarget > distance)
+        if (!isReloading)
         {
-            ChaseTarget();
-        }
-        else
-        {
-            Wait();
-            ShootTarget();
+            if (distanceToTarget > distance)
+            {
+                ChaseTarget();
+            }
+            else
+            {
+                Wait();
+                ShootTarget();
+            }
         }
     }
 
@@ -65,10 +74,40 @@ public class EnemyAI : MonoBehaviour
         if (Time.time > lastAttack + attackRate)
         {
             lastAttack = Time.time;
-            target.GetComponent<PlayerBehaviour>().playerHealth -= damage;
-            GetComponentInChildren<Animator>().SetTrigger("shoot");
-            Debug.Log("Enemy has dealt " + damage + " damage to you");
+
+            if (ammoAmount > 0)
+            {
+                target.GetComponent<PlayerBehaviour>().playerHealth -= damage;
+                GetComponentInChildren<Animator>().SetTrigger("shoot");
+                ammoAmount--;
+            }
+            else if (ammoAmount <= 0)
+            {
+                Wait();
+                Reload();
+            }
+            else
+            {
+                ChaseTarget();
+            }
         }
+    }
+
+    private void Reload()
+    {
+        if (!GetComponentInChildren<Animator>().GetCurrentAnimatorStateInfo(0).IsName("Reload"))
+        {
+            isReloading = true;
+            GetComponentInChildren<Animator>().SetTrigger("reload");
+            StartCoroutine(ReloadAnimation());
+        }
+    }
+
+    private IEnumerator ReloadAnimation()
+    {
+        yield return new WaitForSeconds(reloadSpeed);
+        ammoAmount = reloadAmount;
+        isReloading = false;
     }
 
     public void TargetDetected()
