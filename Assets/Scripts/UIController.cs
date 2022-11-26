@@ -8,7 +8,7 @@ using UnityEngine.InputSystem;
 public class UIController : MonoBehaviour
 {
     [Header("Scripts")]
-    [SerializeField] private Ammo ammo;
+    [SerializeField] private Ammo[] ammo;
     [SerializeField] private PlayerBehaviour playerBehaviour;
 
     [Header("UI Elements")]
@@ -18,6 +18,8 @@ public class UIController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI clipText;
     [SerializeField] private Image gunImage;
     [SerializeField] private Sprite[] gunSprites;
+
+    private int currentGunIndex;
 
     private void Awake()
     {
@@ -30,19 +32,23 @@ public class UIController : MonoBehaviour
     {
         playerHealthText.text = playerBehaviour.playerHealth + "/100";
         playerHealthFillImage.fillAmount = playerBehaviour.playerHealth / 100;
-        ammoText.text = ammo.GetCurrentAmmo() + "/30";
-        clipText.text = ammo.GetCurrentClips().ToString();
+        ammoText.SetText($"{ammo[currentGunIndex].GetCurrentAmmo()}/{ammo[currentGunIndex].GetMaxAmmo()}");
+        clipText.SetText($"{ammo[currentGunIndex].GetCurrentClips()}");
     }
 
     private void SwapWeapon(InputAction.CallbackContext context)
     {
         if (context.control.displayName == "1")
         {
-            gunImage.sprite = gunSprites[0];
+            currentGunIndex = 0;
+            gunImage.sprite = gunSprites[currentGunIndex];
+            GameManager.Instance.ActivateWeaponObject(currentGunIndex);
         }
         else if (context.control.displayName == "2")
         {
-            gunImage.sprite = gunSprites[1];
+            currentGunIndex = 1;
+            gunImage.sprite = gunSprites[currentGunIndex];
+            GameManager.Instance.ActivateWeaponObject(currentGunIndex);
         }
     }
 }

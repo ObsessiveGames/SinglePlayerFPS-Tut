@@ -5,25 +5,38 @@ using UnityEngine.InputSystem;
 
 public class Gun : MonoBehaviour
 {
-    private float range = 100f;
     [SerializeField] private float damage = 20f;
+    [SerializeField] private float fireRate = 0.1f;
+    [SerializeField] private bool isAutomatic;
+    [SerializeField] private Transform cameraRoot;
     public Camera fpsCam;
+
+    private float range = 100f;
+    private float attackTime;
+    private float recoilSpeed = -2f;
+    private bool isFiring;
     private AudioSource gunSound;
     private Ammo ammo;
-    private bool isFiring = false;
-    [SerializeField] private float fireRate = 0.1f;
-    private float attackTime;
-    [SerializeField] private Transform cameraRoot;
-    private float recoilSpeed = -2f;
+    private InputManager inputManager;
 
     private void Awake()
     {
-        InputManager inputManager = new InputManager();
+        inputManager = new InputManager();
         inputManager.Player.Enable();
-        inputManager.Player.Shoot.performed += Shoot;
-        inputManager.Player.Shoot.canceled += Shoot_canceled;
         gunSound = GetComponent<AudioSource>();
         ammo = GetComponent<Ammo>();
+    }
+
+    private void OnEnable()
+    {
+        inputManager.Player.Shoot.performed += Shoot;
+        inputManager.Player.Shoot.canceled += Shoot_canceled;
+    }
+
+    private void OnDisable()
+    {
+        inputManager.Player.Shoot.performed -= Shoot;
+        inputManager.Player.Shoot.canceled -= Shoot_canceled;
     }
 
     private void Update()
@@ -69,9 +82,13 @@ public class Gun : MonoBehaviour
 
     private void Shoot(InputAction.CallbackContext context)
     {
-        if (ammo.GetCurrentAmmo() > 0)
+        if (isAutomatic && ammo.GetCurrentAmmo() > 0)
         {
             isFiring = true;
+        }
+        else if (!isAutomatic && ammo.GetCurrentAmmo() > 0)
+        {
+            IsShooting();
         }
     }
 

@@ -10,11 +10,24 @@ public class Ammo : MonoBehaviour
     [SerializeField] private int reloadAmount = 10;
     [SerializeField] private int clips = 5;
 
+    private int maxAmmo;
+    private InputManager inputManager;
+
     private void Awake()
     {
-        InputManager inputManager = new InputManager();
+        maxAmmo = ammoAmount;
+        inputManager = new InputManager();
         inputManager.Player.Enable();
+    }
+
+    private void OnEnable()
+    {
         inputManager.Player.Reload.performed += Reload;
+    }
+
+    private void OnDisable()
+    {
+        inputManager.Player.Reload.performed -= Reload;
     }
 
     public int GetCurrentAmmo()
@@ -30,6 +43,11 @@ public class Ammo : MonoBehaviour
     public void ReduceCurrentAmmo()
     {
         ammoAmount--;
+    }
+
+    public int GetMaxAmmo()
+    {
+        return maxAmmo;
     }
 
     private void Reload(InputAction.CallbackContext obj)
